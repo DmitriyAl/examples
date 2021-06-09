@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 
 @Service
-public class GrpcClientService {
+public class GrpcUserService implements UserService {
+
+    @Override
     public User getUser(long id) {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9090)
                 .usePlaintext()

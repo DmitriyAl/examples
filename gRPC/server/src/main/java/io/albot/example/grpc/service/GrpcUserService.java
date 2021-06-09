@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @GrpcService
 @Transactional
 @RequiredArgsConstructor
-public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
+public class GrpcUserService extends UserServiceGrpc.UserServiceImplBase {
     private final UserDao userDao;
 
     @Override
@@ -31,6 +31,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
                 .setName(user.getName())
                 .setAge(user.getAge())
                 .addAllAddresses(addresses.stream().map(a -> AddressResponse.newBuilder()
+                        .setId(a.getId())
                         .setCountry(a.getCountry())
                         .setCity(a.getCity())
                         .setStreet(a.getStreet())

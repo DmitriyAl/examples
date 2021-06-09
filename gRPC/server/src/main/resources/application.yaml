@@ -5,14 +5,11 @@ grpc:
     port: 9090
 
 spring:
+  profiles:
+    active: postgres
   sql:
     init:
       enabled: true
-  datasource:
-    url: jdbc:postgresql://localhost:5432/db
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: postgres
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
