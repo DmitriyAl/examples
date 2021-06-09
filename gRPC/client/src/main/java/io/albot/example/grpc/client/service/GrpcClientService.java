@@ -1,24 +1,40 @@
 package io.albot.example.grpc.client.service;
 
-import io.albot.example.grpc.PingPongServiceGrpc;
-import io.albot.example.grpc.PingRequest;
-import io.albot.example.grpc.PongResponse;
+import io.albot.example.grpc.GetUserRequest;
+import io.albot.example.grpc.UserResponse;
+import io.albot.example.grpc.UserServiceGrpc;
+import io.albot.example.grpc.client.dto.Address;
+import io.albot.example.grpc.client.dto.User;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
+
 @Service
 public class GrpcClientService {
-    public String ping() {
+    public User getUser(long id) {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9090)
                 .usePlaintext()
                 .build();
-        PingPongServiceGrpc.PingPongServiceBlockingStub stub
-                = PingPongServiceGrpc.newBlockingStub(channel);
-        PongResponse helloResponse = stub.ping(PingRequest.newBuilder()
-                .setPing("ping")
-                .build());
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(channel);
+        UserResponse userResponse = stub.getUser(GetUserRequest.newBuilder().setId(id).build());
         channel.shutdown();
-        return helloResponse.getPong();
+        return unmarshalUser(userResponse);
+    }
+
+    private User unmarshalUser(UserResponse response) {
+        return User.builder()
+                .id(response.getId())
+                .name(response.getName())
+                .age(response.getAge())
+                .addresses(response.getAddressesList().stream().map(r -> Address.builder()
+                        .country(r.getCountry())
+                        .city(r.getCity())
+                        .street(r.getStreet())
+                        .homeNumber(r.getHomeNumber())
+                        .flatNumber(r.getFlatNumber())
+                        .build()).collect(Collectors.toList()))
+                .build();
     }
 }
