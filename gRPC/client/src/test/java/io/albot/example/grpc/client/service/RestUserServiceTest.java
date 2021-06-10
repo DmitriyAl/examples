@@ -1,11 +1,13 @@
 package io.albot.example.grpc.client.service;
 
 import io.albot.example.grpc.client.dto.User;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,21 +15,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RestUserServiceTest {
     @Autowired
     private RestUserService restUserService;
+    private static final int attempts = 10000;
 
-    @Test
-    void getUser() {
-        User user = restUserService.getUser(1L);
-        assertThat(user.getId()).isEqualTo(1L);
+    @RepeatedTest(10)
+    void getUsersAsynchronously() {
+        ExecutorService executorService = Executors.newFixedThreadPool(500);
+        for (int i = 0; i < attempts; i++) {
+            executorService.execute(() -> {
+                for (int j = 1; j <= 5; j++) {
+                    User user = restUserService.getUser(j);
+                    assertThat(user.getId()).isEqualTo(j);
+                    assertThat(user.getName()).isNotEmpty();
+                }
+            });
+        }
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Test
-    void getUsers() {
-        System.out.println(new Date());
-        for (int i = 0; i < 1000; i++) {
+    @RepeatedTest(10)
+    void getUsersSynchronously() {
+        for (int i = 0; i < attempts; i++) {
             for (int j = 1; j <= 5; j++) {
-                restUserService.getUser(j);
+                User user = restUserService.getUser(j);
+                assertThat(user.getId()).isEqualTo(j);
+                assertThat(user.getName()).isNotEmpty();
             }
         }
-        System.out.println(new Date());
     }
 }
