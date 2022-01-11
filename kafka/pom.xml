@@ -12,8 +12,10 @@
     <modules>
         <module>dto</module>
         <module>producer</module>
+        <module>producer2</module>
         <module>logger</module>
         <module>consumer</module>
+        <module>balancer</module>
     </modules>
 
     <properties>

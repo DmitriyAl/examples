@@ -15,9 +15,7 @@ public class LoggerApplication {
 
     @KafkaListener(topics = "msg")
     public void orderListener(ConsumerRecord<Long, User> record) throws InterruptedException {
-        System.out.println("Partition: " + record.partition());
-        System.out.println("Key: " + record.key());
-        System.out.println("Payload: " + record.value());
+        System.out.println(record.value().getName());
     }
 
     public static void main(String[] args) {
